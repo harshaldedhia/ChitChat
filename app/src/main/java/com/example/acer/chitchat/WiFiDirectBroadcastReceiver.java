@@ -42,7 +42,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             if(networkInfo.isConnected()){
                 mManager.requestConnectionInfo(mChannel, mActivity.connectionInfoListener);
             } else{
-                mActivity.ConnectionStatus.setText("Device Disconected");
+                Toast.makeText(context, "Device Disconnected",Toast.LENGTH_SHORT).show();
             }
         } else if(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)){
             //do something

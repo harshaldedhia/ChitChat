@@ -1,13 +1,16 @@
 package com.example.acer.chitchat;
 
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -17,11 +20,13 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
 
     Button btnSend;
-    TextView read_msg_box;
+    ListView read_msg_box;
     EditText writeMsg;
 
     boolean owner;
@@ -30,6 +35,9 @@ public class ChatActivity extends AppCompatActivity {
     ServerClass serverClass;
     ClientClass clientClass;
     SendReceive sendReceive;
+
+    ChatArrayAdapter chatArrayAdapter;
+    List<ChatMessage> chats;
 
     static final int MESSAGE_READ = 1;
 
@@ -44,6 +52,11 @@ public class ChatActivity extends AppCompatActivity {
         btnSend = findViewById(R.id.sendButton);
         read_msg_box = findViewById(R.id.readMsg);
         writeMsg = findViewById(R.id.writeMsg);
+        chats = new ArrayList<ChatMessage>();
+
+
+
+        chatArrayAdapter = new ChatArrayAdapter(getApplicationContext(), chats);
 
         if (owner) {
             serverClass = new ServerClass();
@@ -54,16 +67,23 @@ public class ChatActivity extends AppCompatActivity {
             clientClass.start();
         }
 
+        //read_msg_box.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        read_msg_box.setAdapter(chatArrayAdapter);
+
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String msg = writeMsg.getText().toString();
-                String curr_text = read_msg_box.getText().toString();
-                String temp_text = curr_text + "Outgoing: " + msg + "\n";
-                read_msg_box.setText(temp_text);
+                /*String curr_text = read_msg_box.getText().toString();
+                String temp_text = curr_text + "\n" + "Outgoing: " + msg;
+                read_msg_box.setText(temp_text);*/
+                chats.add(new ChatMessage(true, msg));
+                chatArrayAdapter.notifyDataSetChanged();
+                writeMsg.setText("");
                 sendReceive.write(msg.getBytes());
             }
         });
+
     }
 
     Handler handler = new Handler(new Handler.Callback() {
@@ -73,7 +93,11 @@ public class ChatActivity extends AppCompatActivity {
                 case MESSAGE_READ:
                     byte[] readBuff = (byte[])msg.obj;
                     String tempMsg = new String(readBuff, 0, msg.arg1);
-                    read_msg_box.setText(tempMsg);
+                    /*String curr_text = read_msg_box.getText().toString();
+                    String temp_text = curr_text + "\n" + "Incoming: " + tempMsg;
+                    read_msg_box.setText(temp_text);*/
+                    chats.add(new ChatMessage(false, tempMsg));
+                    chatArrayAdapter.notifyDataSetChanged();
                     break;
             }
             return true;
@@ -95,6 +119,16 @@ public class ChatActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+        }
+
+        @Override
+        public void interrupt() {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            super.interrupt();
         }
     }
 
@@ -131,12 +165,17 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        public void write(byte[] bytes){
-            try {
-                outputStream.write(bytes);
-            }catch(IOException e){
-                e.printStackTrace();
-            }
+        public void write(final byte[] bytes){
+                new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        try {
+                            outputStream.write(bytes);
+                        } catch(IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
         }
     }
 
@@ -159,6 +198,29 @@ public class ChatActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+        @Override
+        public void interrupt() {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            super.interrupt();
+        }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(owner){
+            serverClass.interrupt();
+        }
+        else{
+            clientClass.interrupt();
+        }
+        Intent i = new Intent();
+        i.setClass(ChatActivity.this, MainActivity.class);
+        startActivity(i);
+    }
 }

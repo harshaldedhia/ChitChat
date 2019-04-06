@@ -35,9 +35,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnOnOff, btnDiscover;
+    Button btnDiscover;
     ListView listView;
-    TextView ConnectionStatus;
 
     WifiManager wifiManager;
 
@@ -61,16 +60,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void exqListener() {
-        btnOnOff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(wifiManager.isWifiEnabled()){
-                    wifiManager.setWifiEnabled(false);
-                } else{
-                    wifiManager.setWifiEnabled(true);
-                }
-            }
-        });
 
         btnDiscover.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,12 +67,12 @@ public class MainActivity extends AppCompatActivity {
                 mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
                     @Override
                     public void onSuccess() {
-                        ConnectionStatus.setText("Discovery Started");
+                        Toast.makeText(getApplicationContext(), "Discovery Started",Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(int reason) {
-                        ConnectionStatus.setText("Discovery Failed to Start");
+                        Toast.makeText(getApplicationContext(),"Discovery Failed to Start",Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -113,10 +102,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initialWork() {
-        btnOnOff = findViewById(R.id.onOff);
         btnDiscover = findViewById(R.id.discover);
         listView = findViewById(R.id.peerListView);
-        ConnectionStatus = findViewById(R.id.connectionStatus);
 
         wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
@@ -167,13 +154,10 @@ public class MainActivity extends AppCompatActivity {
             final InetAddress groupOwnerAddress = info.groupOwnerAddress;
 
             if(info.groupFormed && info.isGroupOwner){
-                Toast.makeText(getApplicationContext(), "Yay I am the owner!!", Toast.LENGTH_LONG).show();
                 Intent chatIntent = new Intent(MainActivity.this, ChatActivity.class);
                 chatIntent.putExtra("Owner?",true);
                 MainActivity.this.startActivity(chatIntent);
             } else if(info.groupFormed){
-                Toast.makeText(getApplicationContext(), "The owner is: "+
-                        info.groupOwnerAddress.getHostAddress(), Toast.LENGTH_LONG).show();
                 Intent chatIntent = new Intent(MainActivity.this, ChatActivity.class);
                 chatIntent.putExtra("Owner?",false);
                 chatIntent.putExtra("Owner Address", groupOwnerAddress);

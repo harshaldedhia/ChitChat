@@ -8,43 +8,33 @@
 
 
         <Button
-            android:id="@+id/onOff"
+            android:id="@+id/discover"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="30dp"
+            android:text="SCAN" />
+
+        <TextView
+            android:id="@+id/available_devices_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="28dp"
-            android:layout_marginTop="55dp"
-            android:text="Wifi On" />
-
-        <Button
-            android:id="@+id/discover"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/onOff"
-            android:layout_alignBottom="@+id/onOff"
-            android:layout_centerHorizontal="true"
-            android:text="discover" />
+            android:layout_marginTop="100dp"
+            android:text="Available Devices:"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp" />
 
         <ListView
             android:id="@+id/peerListView"
             android:layout_width="match_parent"
             android:layout_height="200dp"
+            android:layout_below="@+id/discover"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/onOff"
-            android:layout_marginTop="25dp" />
-
-        <TextView
-            android:id="@+id/connectionStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="15dp"
-            android:text="Connection Status"
-            android:textAlignment="center"
-            android:textColor="@android:color/holo_blue_dark"
-            android:textSize="18sp"
-            android:textStyle="italic" />
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="100dp" />
 
 </RelativeLayout>
